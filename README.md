@@ -20,7 +20,7 @@ Les mises à jour s'installent par-dessus l'ancienne version sans perdre la part
 - **Indices progressifs** : le bouton 灯 clignote après 2 minutes sans progrès. Chaque appui précise l'indice (zone, puis île, puis pont avec le raisonnement), et « Poser » applique le pont.
 - Barre d'actions en haut : **Annuler**, **Vérifier** (ponts faux en rouge), **Indice**, **Effacer**, **Nouvelle** grille.
 - **Chronomètre** et **record par niveau** (seulement pour les parties sans indice). La partie en cours est sauvegardée automatiquement.
-- **Zoom** : pincer à deux doigts (ou molette), ou boutons + / − ; une fois zoomé, glisser depuis un espace vide pour se déplacer. « 1:1 » revient à la grille entière. Tout tient sur un écran, sans défilement, quel que soit le niveau.
+- **Zoom** : pincer à deux doigts (ou molette) ; une fois zoomé, glisser depuis un espace vide pour se déplacer. Tout tient sur un écran, sans défilement, quel que soit le niveau.
 - **Animation de lancement** : les îles se relient puis le kanji 橋 apparaît (toucher l'écran pour la passer).
 
 Fonctionne entièrement hors connexion.

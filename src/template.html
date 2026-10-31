@@ -28,10 +28,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 #area{position:relative;flex:1;min-height:0;border:1px solid var(--ink3);border-radius:10px;overflow:hidden;touch-action:none}
 #stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 #board{display:block;width:100%;height:100%}
-.zoombar{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px;z-index:2}
-.zoombar button{width:30px;height:30px;opacity:.9;border-radius:50%;border:1px solid var(--ink3);background:var(--navy2);color:var(--ink);font-family:var(--num);font-size:19px;font-weight:700;line-height:1;cursor:pointer;padding:0}
-.zoombar button.fit{font-size:11px}
-.dot{fill:var(--ink);opacity:.14}
+.dot{fill:var(--ink);opacity:.34}
 .zone{fill:rgba(138,28,47,.18);stroke:var(--red2);stroke-width:1.5;stroke-dasharray:6 6;animation:breathe 2s ease-in-out infinite}
 @keyframes breathe{50%{opacity:.45}}
 .preview{stroke:var(--ink2);stroke-width:3;stroke-linecap:round;stroke-dasharray:6 7;opacity:.8}
@@ -174,11 +171,6 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   <div id="meta"></div>
   <div id="area">
     <div id="stage"><svg id="board" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg></div>
-    <div class="zoombar">
-      <button id="zoomIn" aria-label="Zoomer">+</button>
-      <button id="zoomOut" aria-label="Dézoomer">−</button>
-      <button id="zoomFit" class="fit" aria-label="Grille entière">1:1</button>
-    </div>
     <div id="win"><div class="wincard">
       <div class="seal">完</div>
       <h2>Archipel relié</h2>
@@ -202,7 +194,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   <ul>
     <li><b>Poser un pont</b> : glisse le doigt d'une île vers une île voisine. Un deuxième glissement pose un deuxième pont.</li>
     <li><b>Retirer un pont</b> : touche-le. Chaque toucher retire un pont.</li>
-    <li><b>Zoom</b> : pince à deux doigts (ou molette de la souris), ou boutons + et −. Une fois zoomé, glisse depuis un espace vide pour te déplacer. « 1:1 » revient à la grille entière.</li>
+    <li><b>Zoom</b> : pince à deux doigts (ou molette de la souris). Une fois zoomé, glisse depuis un espace vide pour te déplacer.</li>
     <li>L'indice se précise à chaque appui : une zone, puis une île, puis le pont et le raisonnement.</li>
     <li>Le bouton ‹ en haut à gauche ramène au choix du niveau. Ta partie est gardée.</li>
   </ul>

@@ -35,10 +35,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 #area{position:relative;flex:1;min-height:0;border:1px solid var(--ink3);border-radius:10px;overflow:hidden;touch-action:none}
 #stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 #board{display:block;width:100%;height:100%}
-.zoombar{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px;z-index:2}
-.zoombar button{width:30px;height:30px;opacity:.9;border-radius:50%;border:1px solid var(--ink3);background:var(--navy2);color:var(--ink);font-family:var(--num);font-size:19px;font-weight:700;line-height:1;cursor:pointer;padding:0}
-.zoombar button.fit{font-size:11px}
-.dot{fill:var(--ink);opacity:.14}
+.dot{fill:var(--ink);opacity:.34}
 .zone{fill:rgba(138,28,47,.18);stroke:var(--red2);stroke-width:1.5;stroke-dasharray:6 6;animation:breathe 2s ease-in-out infinite}
 @keyframes breathe{50%{opacity:.45}}
 .preview{stroke:var(--ink2);stroke-width:3;stroke-linecap:round;stroke-dasharray:6 7;opacity:.8}
@@ -181,11 +178,6 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   <div id="meta"></div>
   <div id="area">
     <div id="stage"><svg id="board" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg></div>
-    <div class="zoombar">
-      <button id="zoomIn" aria-label="Zoomer">+</button>
-      <button id="zoomOut" aria-label="Dézoomer">−</button>
-      <button id="zoomFit" class="fit" aria-label="Grille entière">1:1</button>
-    </div>
     <div id="win"><div class="wincard">
       <div class="seal">完</div>
       <h2>Archipel relié</h2>
@@ -209,7 +201,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   <ul>
     <li><b>Poser un pont</b> : glisse le doigt d'une île vers une île voisine. Un deuxième glissement pose un deuxième pont.</li>
     <li><b>Retirer un pont</b> : touche-le. Chaque toucher retire un pont.</li>
-    <li><b>Zoom</b> : pince à deux doigts (ou molette de la souris), ou boutons + et −. Une fois zoomé, glisse depuis un espace vide pour te déplacer. « 1:1 » revient à la grille entière.</li>
+    <li><b>Zoom</b> : pince à deux doigts (ou molette de la souris). Une fois zoomé, glisse depuis un espace vide pour te déplacer.</li>
     <li>L'indice se précise à chaque appui : une zone, puis une île, puis le pont et le raisonnement.</li>
     <li>Le bouton ‹ en haut à gauche ramène au choix du niveau. Ta partie est gardée.</li>
   </ul>
@@ -502,7 +494,7 @@ function showWin(record) {
 function render() {
   const s = sums(), parts = [];
   for (let r = 0; r < st.H; r++) for (let c = 0; c < st.W; c++)
-    parts.push(`<circle cx="${(c + .5) * S}" cy="${(r + .5) * S}" r="1.6" class="dot"/>`);
+    parts.push(`<circle cx="${(c + .5) * S}" cy="${(r + .5) * S}" r="2.2" class="dot"/>`);
   if (hint && hint.level >= 1) {
     const is = P.islands[hint.island];
     const r0 = Math.max(0, is.r - 2), r1 = Math.min(st.H - 1, is.r + 2), c0 = Math.max(0, is.c - 2), c1 = Math.min(st.W - 1, is.c + 2);
@@ -603,7 +595,7 @@ function areaXY(ev) { const r = $('area').getBoundingClientRect(); return { x: e
 const ptrs = new Map();
 let gest = null;
 function onDown(ev) {
-  if (!st || ev.target.closest('.zoombar,#win')) return;
+  if (!st || ev.target.closest('#win')) return;
   ev.preventDefault();
   try { $('area').setPointerCapture(ev.pointerId); } catch (e) {}
   const p = areaXY(ev);
@@ -828,9 +820,6 @@ function init() {
   area.addEventListener('pointerup', onEnd);
   area.addEventListener('pointercancel', onEnd);
   area.addEventListener('wheel', onWheel, { passive: false });
-  $('zoomIn').addEventListener('click', () => { const { aw, ah } = areaSize(); zoomAt(1.6, aw / 2, ah / 2); });
-  $('zoomOut').addEventListener('click', () => { const { aw, ah } = areaSize(); zoomAt(1 / 1.6, aw / 2, ah / 2); });
-  $('zoomFit').addEventListener('click', () => { Z.s = 1; applyZ(); });
   $('hintBtn').addEventListener('click', askHint);
   $('applyBtn').addEventListener('click', applyHint);
   $('verifyBtn').addEventListener('click', verify);

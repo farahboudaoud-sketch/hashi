@@ -91,7 +91,7 @@ function showWin(record) {
 function render() {
   const s = sums(), parts = [];
   for (let r = 0; r < st.H; r++) for (let c = 0; c < st.W; c++)
-    parts.push(`<circle cx="${(c + .5) * S}" cy="${(r + .5) * S}" r="1.6" class="dot"/>`);
+    parts.push(`<circle cx="${(c + .5) * S}" cy="${(r + .5) * S}" r="2.2" class="dot"/>`);
   if (hint && hint.level >= 1) {
     const is = P.islands[hint.island];
     const r0 = Math.max(0, is.r - 2), r1 = Math.min(st.H - 1, is.r + 2), c0 = Math.max(0, is.c - 2), c1 = Math.min(st.W - 1, is.c + 2);
@@ -192,7 +192,7 @@ function areaXY(ev) { const r = $('area').getBoundingClientRect(); return { x: e
 const ptrs = new Map();
 let gest = null;
 function onDown(ev) {
-  if (!st || ev.target.closest('.zoombar,#win')) return;
+  if (!st || ev.target.closest('#win')) return;
   ev.preventDefault();
   try { $('area').setPointerCapture(ev.pointerId); } catch (e) {}
   const p = areaXY(ev);
@@ -417,9 +417,6 @@ function init() {
   area.addEventListener('pointerup', onEnd);
   area.addEventListener('pointercancel', onEnd);
   area.addEventListener('wheel', onWheel, { passive: false });
-  $('zoomIn').addEventListener('click', () => { const { aw, ah } = areaSize(); zoomAt(1.6, aw / 2, ah / 2); });
-  $('zoomOut').addEventListener('click', () => { const { aw, ah } = areaSize(); zoomAt(1 / 1.6, aw / 2, ah / 2); });
-  $('zoomFit').addEventListener('click', () => { Z.s = 1; applyZ(); });
   $('hintBtn').addEventListener('click', askHint);
   $('applyBtn').addEventListener('click', applyHint);
   $('verifyBtn').addEventListener('click', verify);
