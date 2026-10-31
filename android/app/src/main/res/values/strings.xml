@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hashi</string>
+    <string name="title_activity_main">Hashi</string>
+    <string name="package_name">fr.hashi.jeu</string>
+    <string name="custom_url_scheme">fr.hashi.jeu</string>
+</resources>

@@ -1,0 +1,17 @@
+{
+  "name": "hashi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hashi – jeu de ponts entre îles",
+  "scripts": { "sync": "cap sync android" },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.0",
+    "@fontsource/shippori-mincho": "^5.0.0"
+  }
+}
