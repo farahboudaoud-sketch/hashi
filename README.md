@@ -18,17 +18,19 @@ Les mises à jour s'installent par-dessus l'ancienne version sans perdre la part
 - **Indices progressifs** : le bouton 灯 clignote après 2 minutes sans progrès. Chaque appui précise l'indice (zone, puis île, puis pont avec le raisonnement), et « Poser » applique le pont.
 - **Vérifier** affiche les ponts faux en rouge. Il y a aussi Annuler, Effacer et Nouvelle grille.
 - **Chronomètre** et **record par niveau** (seulement pour les parties sans indice). La partie en cours est sauvegardée automatiquement.
-- **Grandes grilles** : sur téléphone, la grille s'agrandit et défile. Le lien « Vue d'ensemble » affiche la grille entière.
+- **Zoom** : pincer à deux doigts (ou molette), ou boutons + / − ; une fois zoomé, glisser depuis un espace vide pour se déplacer. « 1:1 » revient à la grille entière. Tout tient sur un écran, sans défilement, quel que soit le niveau.
+- **Animation de lancement** : les îles se relient puis le kanji 橋 apparaît (toucher l'écran pour la passer).
 
 Fonctionne entièrement hors connexion.
 
 ## Structure
 
-- `www/index.html` : l'application (générateur, solveur, indices, interface). Polices Shippori Mincho incluses dans `www/fonts/`.
+- `src/` : sources de l'appli (`template.html`, `engine.js` générateur et solveur, `ui.js` interface, `native.js` bouton retour Android). `python3 src/build.py` assemble `www/index.html` (APK) et `preview.html` (version web).
+- `www/` : l'application assemblée, avec les polices Shippori Mincho et Zen Kaku Gothic (chiffres) dans `www/fonts/`.
 - `assets/` : icône et écran de démarrage (sources des images générées dans `android/`).
 - `android/` : projet Android généré par Capacitor, signé avec `hashi-signing.keystore` pour que les mises à jour s'installent par-dessus.
 - `.github/workflows/build-apk.yml` : compile l'APK et le publie dans les Releases à chaque modification sur `main` (ou à la demande depuis l'onglet **Actions**).
 
 ## Modifier l'appli
 
-Tester dans un navigateur : servir le dossier `www/` (par exemple `python3 -m http.server` dans `www/`) et ouvrir la page en mode mobile.
+Modifier les fichiers de `src/`, lancer `python3 src/build.py`, puis tester dans un navigateur : servir le dossier `www/` (par exemple `python3 -m http.server` dans `www/`) et ouvrir la page en mode mobile.

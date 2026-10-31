@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Hashi 橋</title>
+<!--FONTLINKS-->
+<style>
+/*FONTFACES*/
+:root{--navy2:#060c1a;--ink:#efe8d8;--ink2:#b9b2a2;--ink3:rgba(239,232,216,.16);--red:#8a1c2f;--red2:#c4475b;--num:'Chiffres','Shippori Mincho',serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--navy2);overscroll-behavior:none}
+body{font-family:'Shippori Mincho',Georgia,serif;color:var(--ink);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+button{font-family:inherit}
+.app{height:100vh;height:100dvh;max-width:680px;margin:0 auto;display:flex;flex-direction:column;
+padding:calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--ink3);padding-bottom:8px;flex-shrink:0}
+.title{display:flex;align-items:center;gap:10px}
+.kanji{font-size:34px;font-weight:800;line-height:1}
+h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
+.sub{font-size:11px;color:var(--ink2);letter-spacing:.06em}
+.hdrbtn{background:transparent;border:1px solid var(--red);color:var(--red2);border-radius:4px;width:34px;height:34px;font-size:17px;font-weight:800;cursor:pointer;transform:rotate(-6deg)}
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0 6px;flex-shrink:0}
+.lvl{background:transparent;border:1px solid var(--ink3);color:var(--ink2);border-radius:6px;padding:4px 1px;cursor:pointer;line-height:1.15}
+.lvl b{display:block;font-size:17px;font-weight:800;color:var(--ink)}
+.lvl small{font-size:10.5px;display:block}
+.lvl i{font-family:var(--num);font-style:normal;font-size:9.5px;opacity:.75;display:block}
+.lvl.on{background:var(--ink);color:var(--navy2)}
+.lvl.on b{color:var(--red)}
+.stats{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink2);margin:2px 2px 0;flex-shrink:0}
+.stats .v{color:var(--ink);font-size:15px;font-family:var(--num);font-weight:700;margin-left:4px}
+#meta{font-family:var(--num);font-size:11px;color:var(--ink2);text-align:center;letter-spacing:.05em;margin:3px 0 6px;flex-shrink:0}
+#area{position:relative;flex:1;min-height:0;border:1px solid var(--ink3);border-radius:10px;overflow:hidden;touch-action:none}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#board{display:block;width:100%;height:100%}
+.zoombar{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.zoombar button{width:34px;height:34px;border-radius:50%;border:1px solid var(--ink3);background:var(--navy2);color:var(--ink);font-family:var(--num);font-size:19px;font-weight:700;line-height:1;cursor:pointer;padding:0}
+.zoombar button.fit{font-size:12px}
+.dot{fill:var(--ink);opacity:.14}
+.zone{fill:rgba(138,28,47,.18);stroke:var(--red2);stroke-width:1.5;stroke-dasharray:6 6;animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{50%{opacity:.45}}
+.br{stroke:var(--ink);stroke-width:3.4;stroke-linecap:round}
+.br.fresh{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .35s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.br.wrong{stroke:var(--red2);stroke-width:4.5}
+.ghost{stroke:var(--red2);stroke-width:3.4;stroke-dasharray:.06 .05;stroke-linecap:round;animation:breathe 1.4s ease-in-out infinite}
+.ghost.bad{stroke-width:9;stroke-dasharray:none;opacity:.5}
+.isl circle{fill:var(--navy2);stroke:var(--ink);stroke-width:2.4;transition:fill .25s}
+.isl text{fill:var(--ink);font-family:'Chiffres',sans-serif;font-size:26px;font-weight:700;text-anchor:middle;pointer-events:none}
+.isl.full circle{fill:var(--ink)}
+.isl.full text{fill:var(--navy2)}
+.isl.over circle{stroke:var(--red2);fill:#2e1220}
+.isl.over text{fill:var(--red2)}
+.isl.sel circle{stroke:var(--red2);stroke-width:4}
+.isl.hinted circle{stroke:var(--red2);stroke-width:4;animation:breathe 1.2s ease-in-out infinite}
+#hintBox{display:none;margin-top:6px;border-left:3px solid var(--red);background:rgba(239,232,216,.06);padding:7px 10px;border-radius:0 6px 6px 0;font-size:13.5px;line-height:1.45;align-items:center;gap:10px;justify-content:space-between;flex-shrink:0}
+#hintBox.on{display:flex}
+#hintBox.warn{border-left-color:var(--red2);color:#efc3ca}
+#applyBtn{flex-shrink:0}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:6px;flex-shrink:0}
+button.ctl{background:transparent;border:1px solid var(--ink3);color:var(--ink);border-radius:6px;padding:6px 1px;font-size:12px;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;gap:1px}
+button.ctl em{font-style:normal;font-size:17px;line-height:1.1}
+button.ctl.primary{border-color:var(--red)}
+button.ctl.primary em{color:var(--red2)}
+.pulse{animation:pulse 1.3s ease-in-out infinite}
+@keyframes pulse{0%,100%{background:transparent}50%{background:rgba(138,28,47,.35);border-color:var(--red2)}}
+.small{background:var(--red);color:var(--ink);border:0;border-radius:5px;padding:7px 12px;font-size:13px;cursor:pointer}
+#win{position:absolute;inset:0;display:none;place-items:center;background:rgba(6,12,26,.92);z-index:3}
+#win.on{display:grid}
+.wincard{text-align:center;padding:20px}
+.seal{width:104px;height:104px;margin:0 auto 14px;background:var(--red);color:var(--ink);display:grid;place-items:center;font-size:58px;font-weight:800;border-radius:8px;transform:rotate(-8deg);animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{0%{transform:scale(2.4) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+.wincard h2{margin:0 0 6px;font-size:21px;letter-spacing:.12em;font-weight:600}
+.wincard p{font-family:var(--num);margin:4px 0;color:var(--ink2)}
+#winRecord{color:var(--red2)!important}
+#loading{position:absolute;inset:0;display:none;place-items:center;color:var(--ink2);font-size:14px;letter-spacing:.1em;background:var(--navy2);z-index:3}
+#loading.on{display:grid}
+#rules{position:fixed;inset:0;z-index:10;background:rgba(6,12,26,.96);display:none;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) 20px 20px}
+#rules.on{display:block}
+.rulescard{max-width:560px;margin:0 auto;font-size:14.5px;line-height:1.65;color:var(--ink2)}
+.rulescard h3{margin:14px 0 6px;color:var(--ink);font-weight:600;font-size:17px}
+.rulescard ul{margin:0;padding-left:18px}
+.rulescard b{color:var(--ink)}
+#intro{position:fixed;inset:0;z-index:20;background:var(--navy2);display:grid;place-items:center;transition:opacity .6s ease}
+#intro.out{opacity:0;pointer-events:none}
+#intro svg{width:min(70vw,320px);height:auto;overflow:visible}
+.ii circle{fill:var(--navy2);stroke:var(--ink);stroke-width:2.4;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s ease-out forwards}
+.ii text{fill:var(--ink);font-family:'Chiffres',sans-serif;font-size:22px;font-weight:700;text-anchor:middle;opacity:0;animation:fade .3s ease-out forwards}
+.ib{stroke:var(--ink);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .45s ease-out forwards}
+.ifill{fill:var(--ink);opacity:0;animation:fade .3s ease-out forwards}
+.ifilltext{fill:var(--navy2);font-family:'Chiffres',sans-serif;font-size:22px;font-weight:700;text-anchor:middle;opacity:0;animation:fade .3s ease-out forwards}
+.ik{font-family:'Shippori Mincho',serif;font-weight:800;font-size:64px;fill:var(--ink);text-anchor:middle;opacity:0;animation:rise .7s ease-out forwards}
+.it{font-family:'Shippori Mincho',serif;font-weight:600;font-size:15px;letter-spacing:.5em;fill:var(--ink2);text-anchor:middle;opacity:0;animation:fade .6s ease-out forwards}
+.iseal{fill:var(--red);opacity:0;transform-origin:250px 238px;animation:stampi .45s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes fade{to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes stampi{0%{opacity:0;transform:scale(2.2) rotate(-25deg)}100%{opacity:1;transform:scale(1) rotate(-8deg)}}
+@media (max-height:640px){.sub{display:none}.kanji{font-size:28px}.lvl small{display:none}button.ctl{font-size:0;padding:7px 1px}button.ctl em{font-size:18px}}
+</style>
+</head>
+<body>
+<div id="intro">
+  <svg viewBox="0 0 300 300" aria-label="Hashi">
+    <line class="ib" x1="70" y1="60" x2="230" y2="60" pathLength="1" style="animation-delay:.55s"/>
+    <line class="ib" x1="230" y1="60" x2="230" y2="150" pathLength="1" style="animation-delay:.8s"/>
+    <line class="ib" x1="70" y1="54" x2="70" y2="150" pathLength="1" transform="translate(-6 0)" style="animation-delay:1.05s"/>
+    <line class="ib" x1="70" y1="54" x2="70" y2="150" pathLength="1" transform="translate(6 0)" style="animation-delay:1.15s"/>
+    <g class="ii"><circle cx="70" cy="60" r="20" pathLength="1" style="animation-delay:0s"/><text x="70" y="68" style="animation-delay:.25s">3</text></g>
+    <g class="ii"><circle cx="230" cy="60" r="20" pathLength="1" style="animation-delay:.12s"/><text x="230" y="68" style="animation-delay:.37s">2</text></g>
+    <g class="ii"><circle cx="70" cy="150" r="20" pathLength="1" style="animation-delay:.24s"/><text x="70" y="158" style="animation-delay:.49s">2</text></g>
+    <g class="ii"><circle cx="230" cy="150" r="20" pathLength="1" style="animation-delay:.36s"/><text x="230" y="158" style="animation-delay:.61s">1</text></g>
+    <circle class="ifill" cx="70" cy="60" r="20" style="animation-delay:1.3s"/><text class="ifilltext" x="70" y="68" style="animation-delay:1.3s">3</text>
+    <circle class="ifill" cx="230" cy="60" r="20" style="animation-delay:1.3s"/><text class="ifilltext" x="230" y="68" style="animation-delay:1.3s">2</text>
+    <circle class="ifill" cx="70" cy="150" r="20" style="animation-delay:1.3s"/><text class="ifilltext" x="70" y="158" style="animation-delay:1.3s">2</text>
+    <circle class="ifill" cx="230" cy="150" r="20" style="animation-delay:1.3s"/><text class="ifilltext" x="230" y="158" style="animation-delay:1.3s">1</text>
+    <text class="ik" x="150" y="252" style="animation-delay:1.45s">橋</text>
+    <rect class="iseal" x="238" y="226" width="24" height="24" rx="3" style="animation-delay:1.9s"/>
+    <text class="it" x="156" y="290" style="animation-delay:1.7s">HASHI</text>
+  </svg>
+</div>
+<div class="app">
+  <header>
+    <div class="title"><span class="kanji">橋</span><div><h1>HASHI</h1><div class="sub">Relier les îles, pont après pont</div></div></div>
+    <button class="hdrbtn" id="rulesBtn" aria-label="Règles">?</button>
+  </header>
+  <div class="levels">
+    <button class="lvl" data-l="facile"><b>易</b><small>Facile</small><i>7×7</i></button>
+    <button class="lvl" data-l="moyen"><b>中</b><small>Moyen</small><i>10×10</i></button>
+    <button class="lvl" data-l="difficile"><b>難</b><small>Difficile</small><i>13×13</i></button>
+    <button class="lvl" data-l="expert"><b>極</b><small>Expert</small><i>13×18</i></button>
+    <button class="lvl" data-l="maitre"><b>鬼</b><small>Maître</small><i>18×22</i></button>
+  </div>
+  <div class="stats">
+    <div>Temps<span class="v" id="timer">0:00</span></div>
+    <div>Indices<span class="v" id="hintCount">0</span></div>
+    <div>Record<span class="v" id="best">—</span></div>
+  </div>
+  <div id="meta"></div>
+  <div id="area">
+    <div id="stage"><svg id="board" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="zoombar">
+      <button id="zoomIn" aria-label="Zoomer">+</button>
+      <button id="zoomOut" aria-label="Dézoomer">−</button>
+      <button id="zoomFit" class="fit" aria-label="Grille entière">1:1</button>
+    </div>
+    <div id="win"><div class="wincard">
+      <div class="seal">完</div>
+      <h2>Archipel relié</h2>
+      <p>Temps : <span id="winTime"></span> · <span id="winHints"></span></p>
+      <p id="winRecord">Nouveau record pour ce niveau</p>
+      <p style="margin-top:14px"><button class="small" id="winNew">Nouvelle grille</button></p>
+    </div></div>
+    <div id="loading">Préparation de l'encre…</div>
+  </div>
+  <div id="hintBox"><span id="hintText"></span><button class="small" id="applyBtn">Poser</button></div>
+  <div class="controls">
+    <button class="ctl" id="undoBtn"><em>戻</em>Annuler</button>
+    <button class="ctl" id="verifyBtn"><em>検</em>Vérifier</button>
+    <button class="ctl primary" id="hintBtn"><em>灯</em><span>Indice</span></button>
+    <button class="ctl" id="resetBtn"><em>消</em>Effacer</button>
+    <button class="ctl" id="newBtn"><em>新</em>Nouvelle</button>
+  </div>
+</div>
+<div id="rules"><div class="rulescard">
+  <h3 style="margin-top:0">Règles du Hashi</h3>
+  <ul>
+    <li>Chaque île porte un nombre : c'est le <b>nombre exact de ponts</b> qui doivent en partir.</li>
+    <li>Les ponts sont <b>horizontaux ou verticaux</b> et relient deux îles voisines.</li>
+    <li>Entre deux îles : <b>au plus 2 ponts</b>. Les ponts <b>ne se croisent jamais</b>.</li>
+    <li>À la fin, toutes les îles doivent former <b>un seul groupe connecté</b>.</li>
+  </ul>
+  <h3>Comment jouer</h3>
+  <ul>
+    <li>Glisse d'une île vers une voisine, ou touche les deux îles l'une après l'autre : 0 → 1 → 2 → 0 pont.</li>
+    <li>Tu peux aussi toucher un pont, ou l'espace entre deux îles.</li>
+    <li><b>Zoom</b> : pince à deux doigts (ou molette de la souris), ou boutons + et −. Une fois zoomé, glisse depuis un espace vide pour te déplacer. « 1:1 » revient à la grille entière.</li>
+    <li>L'indice se précise à chaque appui : une zone, puis une île, puis le pont et le raisonnement.</li>
+  </ul>
+  <p style="text-align:center;margin-top:18px"><button class="small" id="rulesClose">Fermer</button></p>
+</div></div>
+<script>
+/*ENGINE*/
+/*UI*/
+</script>
+</body>
+</html>
