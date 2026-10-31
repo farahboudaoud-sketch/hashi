@@ -14,9 +14,11 @@ Les mises à jour s'installent par-dessus l'ancienne version sans perdre la part
 ## Le jeu
 
 - **5 niveaux** : Facile 7×7, Moyen 10×10, Difficile 13×13, Expert 13×18, Maître 18×22. Chaque grille est générée au hasard et un solveur vérifie qu'elle n'a qu'une seule solution.
-- **Poser un pont** : glisser d'une île à l'autre, toucher deux îles l'une après l'autre, ou toucher l'espace entre deux îles (0 → 1 → 2 → 0 pont).
+- **Page d'accueil** : choix du niveau (avec les records) et reprise de la partie en cours. Le bouton ‹ ramène à l'accueil.
+- **Poser un pont** : glisser le doigt d'une île vers une île voisine ; un deuxième glissement pose un deuxième pont (2 au maximum).
+- **Retirer un pont** : le toucher ; chaque toucher en retire un.
 - **Indices progressifs** : le bouton 灯 clignote après 2 minutes sans progrès. Chaque appui précise l'indice (zone, puis île, puis pont avec le raisonnement), et « Poser » applique le pont.
-- **Vérifier** affiche les ponts faux en rouge. Il y a aussi Annuler, Effacer et Nouvelle grille.
+- Barre d'actions en haut : **Annuler**, **Vérifier** (ponts faux en rouge), **Indice**, **Effacer**, **Nouvelle** grille.
 - **Chronomètre** et **record par niveau** (seulement pour les parties sans indice). La partie en cours est sauvegardée automatiquement.
 - **Zoom** : pincer à deux doigts (ou molette), ou boutons + / − ; une fois zoomé, glisser depuis un espace vide pour se déplacer. « 1:1 » revient à la grille entière. Tout tient sur un écran, sans défilement, quel que soit le niveau.
 - **Animation de lancement** : les îles se relient puis le kanji 橋 apparaît (toucher l'écran pour la passer).

@@ -4,7 +4,7 @@ const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 };
-let st = null, P = null, selected = -1, undo = [], hint = null, flashWrong = null, fresh = -1, tickT = null, won = false;
+let inGame = false, st = null, P = null, selected = -1, undo = [], hint = null, flashWrong = null, fresh = -1, tickT = null, won = false;
 
 function fmt(ms) {
   const s = Math.floor(ms / 1000);
@@ -31,7 +31,6 @@ function start() {
   P = buildPuzzle(st.W, st.H, st.islands);
   selected = -1; undo = []; hint = null; flashWrong = null; won = st.done;
   st.lastProg = Date.now(); st.bestProg = progressScore();
-  document.querySelectorAll('.lvl').forEach(b => b.classList.toggle('on', b.dataset.l === st.level));
   const L = LEVELS[st.level];
   $('meta').textContent = L.label + ' · ' + st.W + '×' + st.H + ' · grille n° ' + st.no;
   $('board').setAttribute('viewBox', `0 0 ${st.W * S} ${st.H * S}`);
@@ -43,12 +42,19 @@ function start() {
 }
 function save() { if (st) store.set('hashi-v1', st); }
 
-function cycle(k) {
+function addBridge(k) {
   if (won) return;
-  const cur = st.x[k], next = (cur + 1) % 3;
-  if (next > 0 && P.cross[k].some(q => st.x[q] > 0)) { blocked(k); return; }
+  const cur = st.x[k];
+  if (cur >= 2) { showHintText('Deux ponts au maximum entre deux îles.', true); return; }
+  if (P.cross[k].some(q => st.x[q] > 0)) { blocked(k); return; }
   undo.push([k, cur]);
-  st.x[k] = next; fresh = next > cur ? k : -1;
+  st.x[k] = cur + 1; fresh = k;
+  afterMove();
+}
+function removeBridge(k) {
+  if (won || st.x[k] <= 0) return;
+  undo.push([k, st.x[k]]);
+  st.x[k] -= 1; fresh = -1;
   afterMove();
 }
 function afterMove() {
@@ -58,7 +64,6 @@ function afterMove() {
   render(); save(); checkWin();
 }
 function blocked(k) {
-  const g = document.querySelector(`[data-e="${k}"]`);
   showHintText('Ce pont croiserait un pont existant.', true);
   fresh = -1; render();
 }
@@ -196,6 +201,7 @@ function onDown(ev) {
     const pt = svgPoint(ev);
     gest = { mode: 'tap', start: p, pt, island: won ? -1 : islandNear(pt), tx0: Z.tx, ty0: Z.ty };
   } else if (ptrs.size === 2) {
+    clearPreview();
     const [a, b] = [...ptrs.values()];
     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
     gest = { mode: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, s0: Z.s, cx: (mx - Z.tx) / Z.s, cy: (my - Z.ty) / Z.s };
@@ -214,12 +220,29 @@ function onMove(ev) {
   } else if (gest.mode === 'tap' && gest.island < 0 && Math.hypot(p.x - gest.start.x, p.y - gest.start.y) > 8) {
     gest.mode = Z.s > 1.01 ? 'pan' : 'none';
   }
+  if (gest.mode === 'tap' && gest.island >= 0) drawPreview(gest, svgPoint(ev));
   if (gest.mode === 'pan') {
     Z.tx = gest.tx0 + (p.x - gest.start.x); Z.ty = gest.ty0 + (p.y - gest.start.y);
     applyZ();
   }
 }
+function drawPreview(g, pt) {
+  let ln = document.getElementById('preview');
+  const is = P.islands[g.island], x0 = (is.c + .5) * S, y0 = (is.r + .5) * S;
+  const dx = pt.x - x0, dy = pt.y - y0;
+  if (Math.hypot(dx, dy) < 22) { if (ln) ln.remove(); return; }
+  if (!ln) {
+    ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    ln.id = 'preview'; ln.setAttribute('class', 'preview');
+    $('board').insertBefore(ln, $('board').querySelector('.isl'));
+  }
+  const h = Math.abs(dx) > Math.abs(dy);
+  ln.setAttribute('x1', x0); ln.setAttribute('y1', y0);
+  ln.setAttribute('x2', h ? pt.x : x0); ln.setAttribute('y2', h ? y0 : pt.y);
+}
+function clearPreview() { const ln = document.getElementById('preview'); if (ln) ln.remove(); }
 function onEnd(ev) {
+  clearPreview();
   if (!ptrs.has(ev.pointerId)) return;
   ptrs.delete(ev.pointerId);
   const g = gest;
@@ -235,31 +258,21 @@ function onWheel(ev) {
 }
 function handleTap(d, ev) {
   const pt = svgPoint(ev);
-  const j = islandNear(pt);
   const dx = pt.x - d.pt.x, dy = pt.y - d.pt.y, dist = Math.hypot(dx, dy);
-  if (d.island >= 0 && dist > S * 0.45) {
+  if (d.island >= 0) {
+    if (dist < S * 0.45) return;
+    const j = islandNear(pt);
     let k = j >= 0 && j !== d.island ? edgeBetween(d.island, j) : -1;
     if (k < 0) k = Math.abs(dx) > Math.abs(dy) ? edgeInDir(d.island, Math.sign(dx), 0) : edgeInDir(d.island, 0, Math.sign(dy));
-    selected = -1;
-    if (k >= 0) cycle(k); else render();
+    if (k >= 0) addBridge(k);
     return;
   }
-  if (d.island >= 0) {
-    if (selected >= 0 && selected !== d.island) {
-      const k = edgeBetween(selected, d.island);
-      selected = -1;
-      if (k >= 0) { cycle(k); return; }
-      selected = d.island;
-    } else selected = selected === d.island ? -1 : d.island;
-    render(); return;
-  }
+  if (dist > S * 0.3) return;
   const cell = cellAt(pt);
   if (!cell) return;
   const list = P.cellMap.get(cell.r * st.W + cell.c) || [];
-  let k = list.find(q => st.x[q] > 0);
-  if (k === undefined && list.length === 1) k = list[0];
-  selected = -1;
-  if (k !== undefined) cycle(k); else render();
+  const k = list.find(q => st.x[q] > 0);
+  if (k !== undefined) removeBridge(k);
 }
 
 function findHint() {
@@ -311,7 +324,7 @@ function askHint() {
   };
   showHintText(msgs[hint.level], false, hint.level === 3);
   $('hintBtn').classList.remove('pulse');
-  $('hintBtn').querySelector('span').textContent = hint.level < 3 ? 'Plus précis' : 'Indice';
+  $('hintBtn').querySelector('span').textContent = hint.level < 3 ? 'Suite' : 'Indice';
   st.lastProg = Date.now();
   render();
   focusIsland(hint.island);
@@ -351,6 +364,28 @@ function reset() {
   st.x = st.x.map(() => 0); st.done = false; won = false; undo = []; hint = null;
   $('win').classList.remove('on'); showHintText(''); render(); save();
 }
+
+function showHome() {
+  inGame = false;
+  if (st) save();
+  const bests = store.get('hashi-best') || {};
+  document.querySelectorAll('[data-best]').forEach(el => {
+    const b = bests[el.dataset.best];
+    el.textContent = b ? 'record ' + fmt(b) : '';
+  });
+  const rb = $('resumeBtn');
+  if (st && !st.done) {
+    const L = LEVELS[st.level];
+    $('resumeInfo').textContent = L.label + ' · ' + st.W + '×' + st.H + ' · ' + fmt(st.elapsed);
+    rb.classList.add('on');
+  } else rb.classList.remove('on');
+  $('home').classList.remove('hidden');
+}
+function showGame() {
+  inGame = true;
+  $('home').classList.add('hidden');
+  if (st) { st.lastProg = Date.now(); fitStage(false); }
+}
 function updateStats() {
   if (!st) return;
   $('timer').textContent = fmt(st.elapsed);
@@ -359,7 +394,7 @@ function updateStats() {
   $('best').textContent = b ? fmt(b) : '—';
 }
 function tick() {
-  if (!st || won || document.hidden) return;
+  if (!st || won || document.hidden || !inGame) return;
   st.elapsed += 1000; updateStats();
   if (Date.now() - st.lastProg > IDLE_MS && !hint) {
     if (!$('hintBtn').classList.contains('pulse')) {
@@ -371,7 +406,11 @@ function tick() {
 }
 
 function init() {
-  document.querySelectorAll('.lvl').forEach(b => b.addEventListener('click', () => newGame(b.dataset.l)));
+  document.querySelectorAll('.hl').forEach(b => b.addEventListener('click', () => { showGame(); newGame(b.dataset.l); }));
+  $('resumeBtn').addEventListener('click', showGame);
+  $('backBtn').addEventListener('click', showHome);
+  $('winHome').addEventListener('click', showHome);
+  $('rulesBtn2').addEventListener('click', () => $('rules').classList.add('on'));
   const area = $('area');
   area.addEventListener('pointerdown', onDown);
   area.addEventListener('pointermove', onMove);
@@ -393,7 +432,8 @@ function init() {
   $('rulesClose').addEventListener('click', () => $('rules').classList.remove('on'));
   document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); doUndo(); } });
   const saved = store.get('hashi-v1');
-  if (saved && saved.islands && LEVELS[saved.level]) { st = saved; start(); } else newGame('facile');
+  if (saved && saved.islands && LEVELS[saved.level]) { st = saved; start(); }
+  showHome();
   tickT = setInterval(tick, 1000);
   const intro = $('intro');
   const hideIntro = () => { if (intro.classList.contains('out')) return; intro.classList.add('out'); setTimeout(() => intro.remove(), 700); };

@@ -7,7 +7,7 @@
       var r = document.getElementById('rules');
       if (r.classList.contains('on')) { r.classList.remove('on'); return; }
       if (typeof hint !== 'undefined' && hint) { hint = null; showHintText(''); render(); return; }
-      if (Z.s > 1.01) { Z.s = 1; applyZ(); return; }
+      if (inGame) { showHome(); return; }
       A.minimizeApp();
     });
     A.addListener('pause', function () { try { save(); } catch (e) {} });
