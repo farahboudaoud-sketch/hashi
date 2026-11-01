@@ -3,8 +3,21 @@ const LEVELS = {
   moyen:     { W: 10, H: 10, min: 18, max: 23, label: 'Moyen',     kanji: '中' },
   difficile: { W: 13, H: 13, min: 30, max: 36, label: 'Difficile', kanji: '難' },
   expert:    { W: 13, H: 18, min: 42, max: 50, label: 'Expert',    kanji: '極' },
-  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 8, open: 50 } }
+  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 8, open: 50 } },
+  perso:     { W: 12, H: 12, min: 24, max: 30, label: 'Personnalisé', kanji: '自' }
 };
+// Builds the settings of the custom level from a width, a height and a style.
+function customLevel(W, H, hard) {
+  const cells = W * H;
+  const L = { W, H, label: 'Personnalisé', kanji: '自' };
+  if (hard) {
+    Object.assign(L, { min: Math.max(5, Math.round(cells * 0.19)), max: Math.max(6, Math.round(cells * 0.225)), p2: 0.25, loop: 0.45,
+      hard: { look: Math.max(2, Math.round(cells / 50)), open: Math.round(cells * 0.12) } });
+  } else {
+    Object.assign(L, { min: Math.max(4, Math.round(cells * 0.17)), max: Math.max(5, Math.round(cells * 0.21)) });
+  }
+  return L;
+}
 const DIRS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 
 function buildPuzzle(W, H, islands) {
@@ -231,4 +244,4 @@ function generate(levelKey) {
   return best || { ...fallback, unique: false };
 }
 
-if (typeof module !== 'undefined') module.exports = { LEVELS, rateDifficulty, generateOnce, buildPuzzle, initHi, propagate, connected, countSolutions, generate };
+if (typeof module !== 'undefined') module.exports = { LEVELS, customLevel, rateDifficulty, generateOnce, buildPuzzle, initHi, propagate, connected, countSolutions, generate };

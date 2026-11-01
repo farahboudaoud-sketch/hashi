@@ -18,11 +18,16 @@ function sums() {
 }
 function progressScore() { let p = 0; st.x.forEach((v, k) => (p += Math.min(v, st.sol[k]))); return p; }
 
-function newGame(level) {
+function bestKey() { return st.level === 'perso' ? `perso-${st.W}x${st.H}${st.custom && st.custom.hard ? '-d' : ''}` : st.level; }
+function newGame(level, custom) {
+  if (level === 'perso') {
+    custom = custom || (st && st.custom) || store.get('hashi-custom') || { W: 12, H: 12, hard: false };
+    LEVELS.perso = customLevel(custom.W, custom.H, custom.hard);
+  }
   $('loading').classList.add('on');
   setTimeout(() => {
     const g = generate(level);
-    st = { level, W: g.W, H: g.H, islands: g.islands, sol: g.sol, x: g.sol.map(() => 0), elapsed: 0, hints: 0, done: false, no: 1000 + Math.floor(Math.random() * 9000) };
+    st = { level, custom: level === 'perso' ? custom : null, W: g.W, H: g.H, islands: g.islands, sol: g.sol, x: g.sol.map(() => 0), elapsed: 0, hints: 0, done: false, no: 1000 + Math.floor(Math.random() * 9000) };
     start();
     $('loading').classList.remove('on');
   }, 30);
@@ -32,7 +37,7 @@ function start() {
   selected = -1; undo = []; hint = null; flashWrong = null; won = st.done;
   st.lastProg = Date.now(); st.bestProg = progressScore();
   const L = LEVELS[st.level];
-  $('meta').textContent = L.label + ' · ' + st.W + '×' + st.H + ' · grille n° ' + st.no;
+  $('meta').textContent = L.label + (st.custom && st.custom.hard ? ' difficile' : '') + ' · ' + st.W + '×' + st.H + ' · grille n° ' + st.no;
   $('board').setAttribute('viewBox', `0 0 ${st.W * S} ${st.H * S}`);
   fitStage(true);
   $('win').classList.remove('on');
@@ -74,9 +79,9 @@ function checkWin() {
   if (!connected(P, st.x)) { showHintText('Toutes les îles sont complètes, mais elles ne forment pas un seul groupe.', true); return; }
   st.done = true; won = true; save();
   const bests = store.get('hashi-best') || {};
-  const prev = bests[st.level];
+  const prev = bests[bestKey()];
   const record = st.hints === 0 && (!prev || st.elapsed < prev);
-  if (record) { bests[st.level] = st.elapsed; store.set('hashi-best', bests); }
+  if (record) { bests[bestKey()] = st.elapsed; store.set('hashi-best', bests); }
   showWin(record);
 }
 function showWin(record) {
@@ -405,7 +410,7 @@ function showHome() {
   const rb = $('resumeBtn');
   if (st && !st.done) {
     const L = LEVELS[st.level];
-    $('resumeInfo').textContent = L.label + ' · ' + st.W + '×' + st.H + ' · ' + fmt(st.elapsed);
+    $('resumeInfo').textContent = L.label + (st.custom && st.custom.hard ? ' difficile' : '') + ' · ' + st.W + '×' + st.H + ' · ' + fmt(st.elapsed);
     rb.classList.add('on');
   } else rb.classList.remove('on');
   $('home').classList.remove('hidden');
@@ -419,7 +424,7 @@ function updateStats() {
   if (!st) return;
   $('timer').textContent = fmt(st.elapsed);
   $('hintCount').textContent = st.hints;
-  const b = (store.get('hashi-best') || {})[st.level];
+  const b = (store.get('hashi-best') || {})[bestKey()];
   $('best').textContent = b ? fmt(b) : '—';
 }
 function tick() {
@@ -453,7 +458,24 @@ function init() {
     store.set('hashi-theme', light ? 'light' : 'dark');
     applyTheme(light);
   }));
-  document.querySelectorAll('.hl').forEach(b => b.addEventListener('click', () => { showGame(); newGame(b.dataset.l); }));
+  document.querySelectorAll('.hl[data-l]').forEach(b => b.addEventListener('click', () => { showGame(); newGame(b.dataset.l); }));
+  const cust = store.get('hashi-custom') || { W: 12, H: 12, hard: false };
+  const syncCustom = () => {
+    $('cwV').textContent = $('cw').value; $('chV').textContent = $('ch').value;
+    $('cInfo').textContent = 'environ ' + customLevel(+$('cw').value, +$('ch').value, $('cHard').classList.contains('on')).max + ' îles';
+  };
+  $('cw').value = cust.W; $('ch').value = cust.H;
+  $('cHard').classList.toggle('on', !!cust.hard); $('cClassic').classList.toggle('on', !cust.hard);
+  ['cw', 'ch'].forEach(id => $(id).addEventListener('input', syncCustom));
+  $('cClassic').addEventListener('click', () => { $('cClassic').classList.add('on'); $('cHard').classList.remove('on'); syncCustom(); });
+  $('cHard').addEventListener('click', () => { $('cHard').classList.add('on'); $('cClassic').classList.remove('on'); syncCustom(); });
+  $('customBtn').addEventListener('click', () => { const on = $('customPanel').classList.toggle('on'); syncCustom(); if (on) setTimeout(() => $('customPanel').scrollIntoView({ behavior: 'smooth', block: 'end' }), 50); });
+  $('cPlay').addEventListener('click', () => {
+    const c = { W: +$('cw').value, H: +$('ch').value, hard: $('cHard').classList.contains('on') };
+    store.set('hashi-custom', c);
+    showGame(); newGame('perso', c);
+  });
+  syncCustom();
   $('resumeBtn').addEventListener('click', showGame);
   $('backBtn').addEventListener('click', showHome);
   $('winHome').addEventListener('click', showHome);
@@ -476,7 +498,11 @@ function init() {
   $('rulesClose').addEventListener('click', () => $('rules').classList.remove('on'));
   document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); doUndo(); } });
   const saved = store.get('hashi-v1');
-  if (saved && saved.islands && LEVELS[saved.level]) { st = saved; start(); }
+  if (saved && saved.islands && LEVELS[saved.level]) {
+    st = saved;
+    if (st.level === 'perso' && st.custom) LEVELS.perso = customLevel(st.custom.W, st.custom.H, st.custom.hard);
+    start();
+  }
   showHome();
   tickT = setInterval(tick, 1000);
   const intro = $('intro');

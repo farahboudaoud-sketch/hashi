@@ -84,6 +84,18 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 .hl strong{font-weight:600;font-size:17px}
 .hl i{font-family:var(--num);font-style:normal;font-size:12px;color:var(--ink2)}
 .hl em{font-family:var(--num);font-style:normal;font-size:12px;color:var(--ink2)}
+.hl em{font-size:12px}
+#customPanel{display:none;border:1px solid var(--ink3);border-radius:8px;padding:12px 14px;text-align:left;margin-top:-2px}
+#customPanel.on{display:block}
+.crow{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:14px}
+.crow span{width:64px;color:var(--ink2)}
+.crow input{flex:1;accent-color:var(--red2);height:28px}
+.crow b{font-family:var(--num);font-weight:700;width:28px;text-align:right;font-size:16px}
+.cseg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink3);border-radius:6px;overflow:hidden;margin:4px 0 12px}
+.cseg button{background:transparent;border:0;color:var(--ink2);padding:8px;font-size:14px;cursor:pointer}
+.cseg button.on{background:var(--ink);color:var(--navy2)}
+.cfoot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#cInfo{font-family:var(--num);font-size:12px;color:var(--ink2)}
 .link{background:none;border:0;color:var(--ink2);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .pulse{animation:pulse 1.3s ease-in-out infinite}
 @keyframes pulse{0%,100%{background:transparent}50%{background:rgba(138,28,47,.35);border-color:var(--red2)}}
@@ -158,6 +170,13 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
       <button class="hl" data-l="difficile"><b>難</b><span><strong>Difficile</strong><i>13×13</i></span><em data-best="difficile"></em></button>
       <button class="hl" data-l="expert"><b>極</b><span><strong>Expert</strong><i>13×18</i></span><em data-best="expert"></em></button>
       <button class="hl" data-l="maitre"><b>鬼</b><span><strong>Maître</strong><i>18×22</i></span><em data-best="maitre"></em></button>
+      <button class="hl" id="customBtn"><b>自</b><span><strong>Personnalisé</strong><i>choisis la taille</i></span><em>›</em></button>
+      <div id="customPanel">
+        <label class="crow"><span>Largeur</span><input type="range" id="cw" min="5" max="25" step="1"><b id="cwV"></b></label>
+        <label class="crow"><span>Hauteur</span><input type="range" id="ch" min="5" max="30" step="1"><b id="chV"></b></label>
+        <div class="cseg"><button id="cClassic" class="on">Classique</button><button id="cHard">Difficile</button></div>
+        <div class="cfoot"><span id="cInfo"></span><button class="small" id="cPlay">Jouer</button></div>
+      </div>
     </div>
     <button class="link" id="rulesBtn2">Règles du jeu</button>
   </div>
@@ -210,6 +229,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
     <li>L'indice se précise à chaque appui : une zone, puis une île, puis le pont et le raisonnement.</li>
     <li>Le bouton ‹ en haut à gauche ramène au choix du niveau. Ta partie est gardée.</li>
     <li>Le bouton 明 / 暗 passe en mode clair ou sombre.</li>
+    <li><b>Personnalisé</b> (accueil) : choisis la largeur (5 à 25) et la hauteur (5 à 30), en style classique ou difficile.</li>
   </ul>
   <p style="text-align:center;margin-top:18px"><button class="small" id="rulesClose">Fermer</button></p>
 </div></div>
@@ -219,8 +239,21 @@ const LEVELS = {
   moyen:     { W: 10, H: 10, min: 18, max: 23, label: 'Moyen',     kanji: '中' },
   difficile: { W: 13, H: 13, min: 30, max: 36, label: 'Difficile', kanji: '難' },
   expert:    { W: 13, H: 18, min: 42, max: 50, label: 'Expert',    kanji: '極' },
-  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 8, open: 50 } }
+  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 8, open: 50 } },
+  perso:     { W: 12, H: 12, min: 24, max: 30, label: 'Personnalisé', kanji: '自' }
 };
+// Builds the settings of the custom level from a width, a height and a style.
+function customLevel(W, H, hard) {
+  const cells = W * H;
+  const L = { W, H, label: 'Personnalisé', kanji: '自' };
+  if (hard) {
+    Object.assign(L, { min: Math.max(5, Math.round(cells * 0.19)), max: Math.max(6, Math.round(cells * 0.225)), p2: 0.25, loop: 0.45,
+      hard: { look: Math.max(2, Math.round(cells / 50)), open: Math.round(cells * 0.12) } });
+  } else {
+    Object.assign(L, { min: Math.max(4, Math.round(cells * 0.17)), max: Math.max(5, Math.round(cells * 0.21)) });
+  }
+  return L;
+}
 const DIRS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 
 function buildPuzzle(W, H, islands) {
@@ -447,7 +480,7 @@ function generate(levelKey) {
   return best || { ...fallback, unique: false };
 }
 
-if (typeof module !== 'undefined') module.exports = { LEVELS, rateDifficulty, generateOnce, buildPuzzle, initHi, propagate, connected, countSolutions, generate };
+if (typeof module !== 'undefined') module.exports = { LEVELS, customLevel, rateDifficulty, generateOnce, buildPuzzle, initHi, propagate, connected, countSolutions, generate };
 
 const S = 60, IDLE_MS = 120000;
 const $ = id => document.getElementById(id);
@@ -469,11 +502,16 @@ function sums() {
 }
 function progressScore() { let p = 0; st.x.forEach((v, k) => (p += Math.min(v, st.sol[k]))); return p; }
 
-function newGame(level) {
+function bestKey() { return st.level === 'perso' ? `perso-${st.W}x${st.H}${st.custom && st.custom.hard ? '-d' : ''}` : st.level; }
+function newGame(level, custom) {
+  if (level === 'perso') {
+    custom = custom || (st && st.custom) || store.get('hashi-custom') || { W: 12, H: 12, hard: false };
+    LEVELS.perso = customLevel(custom.W, custom.H, custom.hard);
+  }
   $('loading').classList.add('on');
   setTimeout(() => {
     const g = generate(level);
-    st = { level, W: g.W, H: g.H, islands: g.islands, sol: g.sol, x: g.sol.map(() => 0), elapsed: 0, hints: 0, done: false, no: 1000 + Math.floor(Math.random() * 9000) };
+    st = { level, custom: level === 'perso' ? custom : null, W: g.W, H: g.H, islands: g.islands, sol: g.sol, x: g.sol.map(() => 0), elapsed: 0, hints: 0, done: false, no: 1000 + Math.floor(Math.random() * 9000) };
     start();
     $('loading').classList.remove('on');
   }, 30);
@@ -483,7 +521,7 @@ function start() {
   selected = -1; undo = []; hint = null; flashWrong = null; won = st.done;
   st.lastProg = Date.now(); st.bestProg = progressScore();
   const L = LEVELS[st.level];
-  $('meta').textContent = L.label + ' · ' + st.W + '×' + st.H + ' · grille n° ' + st.no;
+  $('meta').textContent = L.label + (st.custom && st.custom.hard ? ' difficile' : '') + ' · ' + st.W + '×' + st.H + ' · grille n° ' + st.no;
   $('board').setAttribute('viewBox', `0 0 ${st.W * S} ${st.H * S}`);
   fitStage(true);
   $('win').classList.remove('on');
@@ -525,9 +563,9 @@ function checkWin() {
   if (!connected(P, st.x)) { showHintText('Toutes les îles sont complètes, mais elles ne forment pas un seul groupe.', true); return; }
   st.done = true; won = true; save();
   const bests = store.get('hashi-best') || {};
-  const prev = bests[st.level];
+  const prev = bests[bestKey()];
   const record = st.hints === 0 && (!prev || st.elapsed < prev);
-  if (record) { bests[st.level] = st.elapsed; store.set('hashi-best', bests); }
+  if (record) { bests[bestKey()] = st.elapsed; store.set('hashi-best', bests); }
   showWin(record);
 }
 function showWin(record) {
@@ -856,7 +894,7 @@ function showHome() {
   const rb = $('resumeBtn');
   if (st && !st.done) {
     const L = LEVELS[st.level];
-    $('resumeInfo').textContent = L.label + ' · ' + st.W + '×' + st.H + ' · ' + fmt(st.elapsed);
+    $('resumeInfo').textContent = L.label + (st.custom && st.custom.hard ? ' difficile' : '') + ' · ' + st.W + '×' + st.H + ' · ' + fmt(st.elapsed);
     rb.classList.add('on');
   } else rb.classList.remove('on');
   $('home').classList.remove('hidden');
@@ -870,7 +908,7 @@ function updateStats() {
   if (!st) return;
   $('timer').textContent = fmt(st.elapsed);
   $('hintCount').textContent = st.hints;
-  const b = (store.get('hashi-best') || {})[st.level];
+  const b = (store.get('hashi-best') || {})[bestKey()];
   $('best').textContent = b ? fmt(b) : '—';
 }
 function tick() {
@@ -904,7 +942,24 @@ function init() {
     store.set('hashi-theme', light ? 'light' : 'dark');
     applyTheme(light);
   }));
-  document.querySelectorAll('.hl').forEach(b => b.addEventListener('click', () => { showGame(); newGame(b.dataset.l); }));
+  document.querySelectorAll('.hl[data-l]').forEach(b => b.addEventListener('click', () => { showGame(); newGame(b.dataset.l); }));
+  const cust = store.get('hashi-custom') || { W: 12, H: 12, hard: false };
+  const syncCustom = () => {
+    $('cwV').textContent = $('cw').value; $('chV').textContent = $('ch').value;
+    $('cInfo').textContent = 'environ ' + customLevel(+$('cw').value, +$('ch').value, $('cHard').classList.contains('on')).max + ' îles';
+  };
+  $('cw').value = cust.W; $('ch').value = cust.H;
+  $('cHard').classList.toggle('on', !!cust.hard); $('cClassic').classList.toggle('on', !cust.hard);
+  ['cw', 'ch'].forEach(id => $(id).addEventListener('input', syncCustom));
+  $('cClassic').addEventListener('click', () => { $('cClassic').classList.add('on'); $('cHard').classList.remove('on'); syncCustom(); });
+  $('cHard').addEventListener('click', () => { $('cHard').classList.add('on'); $('cClassic').classList.remove('on'); syncCustom(); });
+  $('customBtn').addEventListener('click', () => { const on = $('customPanel').classList.toggle('on'); syncCustom(); if (on) setTimeout(() => $('customPanel').scrollIntoView({ behavior: 'smooth', block: 'end' }), 50); });
+  $('cPlay').addEventListener('click', () => {
+    const c = { W: +$('cw').value, H: +$('ch').value, hard: $('cHard').classList.contains('on') };
+    store.set('hashi-custom', c);
+    showGame(); newGame('perso', c);
+  });
+  syncCustom();
   $('resumeBtn').addEventListener('click', showGame);
   $('backBtn').addEventListener('click', showHome);
   $('winHome').addEventListener('click', showHome);
@@ -927,7 +982,11 @@ function init() {
   $('rulesClose').addEventListener('click', () => $('rules').classList.remove('on'));
   document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); doUndo(); } });
   const saved = store.get('hashi-v1');
-  if (saved && saved.islands && LEVELS[saved.level]) { st = saved; start(); }
+  if (saved && saved.islands && LEVELS[saved.level]) {
+    st = saved;
+    if (st.level === 'perso' && st.custom) LEVELS.perso = customLevel(st.custom.W, st.custom.H, st.custom.hard);
+    start();
+  }
   showHome();
   tickT = setInterval(tick, 1000);
   const intro = $('intro');

@@ -77,6 +77,18 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 .hl strong{font-weight:600;font-size:17px}
 .hl i{font-family:var(--num);font-style:normal;font-size:12px;color:var(--ink2)}
 .hl em{font-family:var(--num);font-style:normal;font-size:12px;color:var(--ink2)}
+.hl em{font-size:12px}
+#customPanel{display:none;border:1px solid var(--ink3);border-radius:8px;padding:12px 14px;text-align:left;margin-top:-2px}
+#customPanel.on{display:block}
+.crow{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:14px}
+.crow span{width:64px;color:var(--ink2)}
+.crow input{flex:1;accent-color:var(--red2);height:28px}
+.crow b{font-family:var(--num);font-weight:700;width:28px;text-align:right;font-size:16px}
+.cseg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink3);border-radius:6px;overflow:hidden;margin:4px 0 12px}
+.cseg button{background:transparent;border:0;color:var(--ink2);padding:8px;font-size:14px;cursor:pointer}
+.cseg button.on{background:var(--ink);color:var(--navy2)}
+.cfoot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#cInfo{font-family:var(--num);font-size:12px;color:var(--ink2)}
 .link{background:none;border:0;color:var(--ink2);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .pulse{animation:pulse 1.3s ease-in-out infinite}
 @keyframes pulse{0%,100%{background:transparent}50%{background:rgba(138,28,47,.35);border-color:var(--red2)}}
@@ -151,6 +163,13 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
       <button class="hl" data-l="difficile"><b>難</b><span><strong>Difficile</strong><i>13×13</i></span><em data-best="difficile"></em></button>
       <button class="hl" data-l="expert"><b>極</b><span><strong>Expert</strong><i>13×18</i></span><em data-best="expert"></em></button>
       <button class="hl" data-l="maitre"><b>鬼</b><span><strong>Maître</strong><i>18×22</i></span><em data-best="maitre"></em></button>
+      <button class="hl" id="customBtn"><b>自</b><span><strong>Personnalisé</strong><i>choisis la taille</i></span><em>›</em></button>
+      <div id="customPanel">
+        <label class="crow"><span>Largeur</span><input type="range" id="cw" min="5" max="25" step="1"><b id="cwV"></b></label>
+        <label class="crow"><span>Hauteur</span><input type="range" id="ch" min="5" max="30" step="1"><b id="chV"></b></label>
+        <div class="cseg"><button id="cClassic" class="on">Classique</button><button id="cHard">Difficile</button></div>
+        <div class="cfoot"><span id="cInfo"></span><button class="small" id="cPlay">Jouer</button></div>
+      </div>
     </div>
     <button class="link" id="rulesBtn2">Règles du jeu</button>
   </div>
@@ -203,6 +222,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
     <li>L'indice se précise à chaque appui : une zone, puis une île, puis le pont et le raisonnement.</li>
     <li>Le bouton ‹ en haut à gauche ramène au choix du niveau. Ta partie est gardée.</li>
     <li>Le bouton 明 / 暗 passe en mode clair ou sombre.</li>
+    <li><b>Personnalisé</b> (accueil) : choisis la largeur (5 à 25) et la hauteur (5 à 30), en style classique ou difficile.</li>
   </ul>
   <p style="text-align:center;margin-top:18px"><button class="small" id="rulesClose">Fermer</button></p>
 </div></div>
