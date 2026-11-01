@@ -3,7 +3,7 @@ const LEVELS = {
   moyen:     { W: 10, H: 10, min: 18, max: 23, label: 'Moyen',     kanji: '中' },
   difficile: { W: 13, H: 13, min: 30, max: 36, label: 'Difficile', kanji: '難' },
   expert:    { W: 13, H: 18, min: 42, max: 50, label: 'Expert',    kanji: '極' },
-  maitre:    { W: 18, H: 22, min: 70, max: 82, label: 'Maître',    kanji: '鬼' }
+  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 8, open: 50 } }
 };
 const DIRS = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 
@@ -126,6 +126,35 @@ function countSolutions(P, limit, maxNodes) {
   return { count, sol, aborted: nodes > maxNodes };
 }
 
+
+// Difficulty: how much work is left after simple propagation, and how many
+// "proof by contradiction" steps (try a value, propagate, see it fail) are needed.
+function rateDifficulty(P) {
+  const n = P.edges.length, lo = new Int8Array(n), hi = initHi(P);
+  if (propagate(P, lo, hi) === false) return { level: -1 };
+  const open = () => { let c = 0; for (let k = 0; k < n; k++) if (lo[k] < hi[k]) c++; return c; };
+  const u0 = open();
+  let look = 0;
+  while (open()) {
+    let progress = false;
+    for (let k = 0; k < n && !progress; k++) {
+      if (lo[k] === hi[k]) continue;
+      for (const v of [lo[k], hi[k]]) {
+        const l2 = lo.slice(), h2 = hi.slice();
+        l2[k] = v; h2[k] = v;
+        if (propagate(P, l2, h2) === false || !connected(P, h2)) {
+          if (v === lo[k]) lo[k]++; else hi[k]--;
+          look++; progress = true;
+          if (propagate(P, lo, hi) === false) return { level: -1 };
+          break;
+        }
+      }
+    }
+    if (!progress) return { level: 2, u0, look };
+  }
+  return { level: u0 ? 1 : 0, u0, look };
+}
+
 function generateOnce(L) {
   const { W, H } = L;
   const target = L.min + Math.floor(Math.random() * (L.max - L.min + 1));
@@ -153,7 +182,7 @@ function generateOnce(L) {
     for (let s = 1; s < dist; s++) occ[isl[a].r + dr * s][isl[a].c + dc * s] = 2;
     occ[r][c] = 1;
     isl.push({ r, c });
-    conns.push([a, isl.length - 1, Math.random() < 0.42 ? 2 : 1]);
+    conns.push([a, isl.length - 1, Math.random() < (L.p2 ?? 0.42) ? 2 : 1]);
   }
   if (isl.length < L.min) return null;
   const base = buildPuzzle(W, H, isl.map(x => ({ r: x.r, c: x.c, n: 0 })));
@@ -161,7 +190,7 @@ function generateOnce(L) {
   conns.forEach(([a, b, w]) => weight.set(Math.min(a, b) * 10000 + Math.max(a, b), w));
   base.edges.forEach(e => {
     const key = Math.min(e.a, e.b) * 10000 + Math.max(e.a, e.b);
-    if (weight.has(key) || Math.random() > 0.15) return;
+    if (weight.has(key) || Math.random() > (L.loop ?? 0.15)) return;
     if (e.cells.every(([r, c]) => occ[r][c] === 0)) {
       e.cells.forEach(([r, c]) => (occ[r][c] = 2));
       weight.set(key, 1);
@@ -175,18 +204,31 @@ function generateOnce(L) {
 
 function generate(levelKey) {
   const L = LEVELS[levelKey];
-  let fallback = null;
+  let fallback = null, best = null, bestScore = -1;
   const t0 = Date.now();
-  for (let attempt = 0; attempt < 400; attempt++) {
+  for (let attempt = 0; attempt < 6000; attempt++) {
+    if (Date.now() - t0 > (L.hard ? 7000 : 6000)) break;
     const g = generateOnce(L);
     if (!g) continue;
     if (!fallback) fallback = g;
     const P = buildPuzzle(g.W, g.H, g.islands);
+    if (L.hard) {
+      // Keep only grids that need several proofs by contradiction (and are still solvable by reasoning).
+      const r = rateDifficulty(P);
+      if (r.level !== 1) continue;
+      const ok = r.look >= L.hard.look && r.u0 >= L.hard.open;
+      const score = r.look * 3 + r.u0;
+      if (!ok && score <= bestScore) continue;
+      const res = countSolutions(P, 2, 40000);
+      if (res.count !== 1 || res.aborted) continue;
+      if (ok) return { ...g, unique: true, attempts: attempt + 1, rating: r };
+      best = { ...g, unique: true, rating: r }; bestScore = score;
+      continue;
+    }
     const res = countSolutions(P, 2, 40000);
     if (res.count === 1 && !res.aborted) return { ...g, unique: true, attempts: attempt + 1 };
-    if (Date.now() - t0 > 6000) break;
   }
-  return { ...fallback, unique: false };
+  return best || { ...fallback, unique: false };
 }
 
-if (typeof module !== 'undefined') module.exports = { LEVELS, buildPuzzle, initHi, propagate, connected, countSolutions, generate };
+if (typeof module !== 'undefined') module.exports = { LEVELS, rateDifficulty, generateOnce, buildPuzzle, initHi, propagate, connected, countSolutions, generate };

@@ -7,7 +7,8 @@
 <!--FONTLINKS-->
 <style>
 /*FONTFACES*/
-:root{--navy2:#060c1a;--ink:#efe8d8;--ink2:#b9b2a2;--ink3:rgba(239,232,216,.16);--red:#8a1c2f;--red2:#c4475b;--num:'Chiffres','Shippori Mincho',serif}
+:root{--navy2:#060c1a;--ink:#efe8d8;--ink2:#b9b2a2;--ink3:rgba(239,232,216,.16);--red:#8a1c2f;--red2:#c4475b;--paper:#efe8d8;--tint:rgba(239,232,216,.06);--overfill:#2e1220;--warn:#efc3ca;--veil:rgba(6,12,26,.92);--veil2:rgba(6,12,26,.96);--num:'Chiffres','Shippori Mincho',serif}
+body.light{--navy2:#efe8d8;--ink:#0b1529;--ink2:#5b5e6b;--ink3:rgba(11,21,41,.22);--red2:#8a1c2f;--tint:rgba(11,21,41,.06);--overfill:#f2d3d8;--warn:#7a1a2b;--veil:rgba(239,232,216,.93);--veil2:rgba(239,232,216,.97)}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--navy2);overscroll-behavior:none}
 body{font-family:'Shippori Mincho',Georgia,serif;color:var(--ink);-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
@@ -19,6 +20,8 @@ header{display:flex;align-items:center;justify-content:space-between;gap:10px;bo
 .kanji{font-size:28px;font-weight:800;line-height:1}
 h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 .sub{font-size:11px;color:var(--ink2);letter-spacing:.06em}
+.hdrbtn.theme{border-color:var(--ink3);color:var(--ink);transform:none;font-size:16px;font-weight:600;margin-right:6px}
+#home .theme{position:absolute;top:calc(14px + env(safe-area-inset-top));right:16px;margin:0}
 .back{background:transparent;border:1px solid var(--ink3);color:var(--ink);border-radius:6px;width:34px;height:34px;font-size:24px;line-height:1;cursor:pointer;padding:0 0 3px}
 .title{flex:1}
 .hdrbtn{background:transparent;border:1px solid var(--red);color:var(--red2);border-radius:4px;width:34px;height:34px;font-size:17px;font-weight:800;cursor:pointer;transform:rotate(-6deg)}
@@ -42,33 +45,33 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 .isl text{fill:var(--ink);font-family:'Chiffres',sans-serif;font-size:26px;font-weight:700;text-anchor:middle;pointer-events:none}
 .isl.full circle{fill:var(--ink)}
 .isl.full text{fill:var(--navy2)}
-.isl.over circle{stroke:var(--red2);fill:#2e1220}
+.isl.over circle{stroke:var(--red2);fill:var(--overfill)}
 .isl.over text{fill:var(--red2)}
 .isl.sel circle{stroke:var(--red2);stroke-width:4}
 .isl.hinted circle{stroke:var(--red2);stroke-width:4;animation:breathe 1.2s ease-in-out infinite}
-#hintBox{display:none;margin-top:6px;min-height:0;border-left:3px solid var(--red);background:rgba(239,232,216,.06);padding:7px 10px;border-radius:0 6px 6px 0;font-size:13.5px;line-height:1.45;align-items:center;gap:10px;justify-content:space-between;flex-shrink:0}
+#hintBox{display:none;margin-top:6px;min-height:0;border-left:3px solid var(--red);background:var(--tint);padding:7px 10px;border-radius:0 6px 6px 0;font-size:13.5px;line-height:1.45;align-items:center;gap:10px;justify-content:space-between;flex-shrink:0}
 #hintBox.on{display:flex}
-#hintBox.warn{border-left-color:var(--red2);color:#efc3ca}
+#hintBox.warn{border-left-color:var(--red2);color:var(--warn)}
 #applyBtn{flex-shrink:0}
 .actions{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0 6px;flex-shrink:0}
 .act{background:transparent;border:1px solid var(--ink3);color:var(--ink);border-radius:6px;height:30px;padding:0 2px;font-size:11.5px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:hidden}
 .act em{font-style:normal;font-size:14px;line-height:1}
 .act.primary{border-color:var(--red)}
 .act.primary em{color:var(--red2)}
-.ghostb{background:transparent;border:1px solid var(--ink3)}
+.small.ghostb{background:transparent;border:1px solid var(--ink3);color:var(--ink)}
 #home{position:fixed;inset:0;z-index:8;background:var(--navy2);overflow:auto;display:flex;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));transition:opacity .35s ease}
 #home.hidden{opacity:0;pointer-events:none}
 .homein{margin:auto;width:100%;max-width:420px;text-align:center}
 .hk{font-size:88px;font-weight:800;line-height:1}
 .ht{font-size:24px;letter-spacing:.5em;margin:10px 0 2px;padding-left:.5em;font-weight:600}
 .hs{font-size:13px;color:var(--ink2);letter-spacing:.06em;margin-bottom:24px}
-.resume{display:none;width:100%;background:var(--red);color:var(--ink);border:0;border-radius:8px;padding:12px;font-size:16px;cursor:pointer;margin-bottom:18px}
+.resume{display:none;width:100%;background:var(--red);color:var(--paper);border:0;border-radius:8px;padding:12px;font-size:16px;cursor:pointer;margin-bottom:18px}
 .resume.on{display:block}
 .resume small{display:block;font-family:var(--num);font-size:12px;opacity:.85;margin-top:2px}
 .hlabel{font-size:12px;color:var(--ink2);letter-spacing:.12em;margin-bottom:8px;text-align:left}
 .hlevels{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
 .hl{display:flex;align-items:center;gap:14px;background:transparent;border:1px solid var(--ink3);border-radius:8px;padding:10px 14px;color:var(--ink);cursor:pointer;text-align:left}
-.hl:active{background:rgba(239,232,216,.06)}
+.hl:active{background:var(--tint)}
 .hl b{font-size:28px;font-weight:800;color:var(--red2);width:34px}
 .hl span{flex:1;display:flex;flex-direction:column}
 .hl strong{font-weight:600;font-size:17px}
@@ -77,18 +80,18 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 .link{background:none;border:0;color:var(--ink2);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .pulse{animation:pulse 1.3s ease-in-out infinite}
 @keyframes pulse{0%,100%{background:transparent}50%{background:rgba(138,28,47,.35);border-color:var(--red2)}}
-.small{background:var(--red);color:var(--ink);border:0;border-radius:5px;padding:7px 12px;font-size:13px;cursor:pointer}
-#win{position:absolute;inset:0;display:none;place-items:center;background:rgba(6,12,26,.92);z-index:3}
+.small{background:var(--red);color:var(--paper);border:0;border-radius:5px;padding:7px 12px;font-size:13px;cursor:pointer}
+#win{position:absolute;inset:0;display:none;place-items:center;background:var(--veil);z-index:3}
 #win.on{display:grid}
 .wincard{text-align:center;padding:20px}
-.seal{width:104px;height:104px;margin:0 auto 14px;background:var(--red);color:var(--ink);display:grid;place-items:center;font-size:58px;font-weight:800;border-radius:8px;transform:rotate(-8deg);animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both}
+.seal{width:104px;height:104px;margin:0 auto 14px;background:var(--red);color:var(--paper);display:grid;place-items:center;font-size:58px;font-weight:800;border-radius:8px;transform:rotate(-8deg);animation:stamp .5s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes stamp{0%{transform:scale(2.4) rotate(-20deg);opacity:0}100%{transform:scale(1) rotate(-8deg);opacity:1}}
 .wincard h2{margin:0 0 6px;font-size:21px;letter-spacing:.12em;font-weight:600}
 .wincard p{font-family:var(--num);margin:4px 0;color:var(--ink2)}
 #winRecord{color:var(--red2)!important}
 #loading{position:absolute;inset:0;display:none;place-items:center;color:var(--ink2);font-size:14px;letter-spacing:.1em;background:var(--navy2);z-index:3}
 #loading.on{display:grid}
-#rules{position:fixed;inset:0;z-index:10;background:rgba(6,12,26,.96);display:none;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) 20px 20px}
+#rules{position:fixed;inset:0;z-index:10;background:var(--veil2);display:none;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) 20px 20px}
 #rules.on{display:block}
 .rulescard{max-width:560px;margin:0 auto;font-size:14.5px;line-height:1.65;color:var(--ink2)}
 .rulescard h3{margin:14px 0 6px;color:var(--ink);font-weight:600;font-size:17px}
@@ -114,6 +117,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 </style>
 </head>
 <body>
+<script>try{if(localStorage.getItem('hashi-theme')==='"light"')document.body.classList.add('light')}catch(e){}</script>
 <div id="intro">
   <svg viewBox="0 0 300 300" aria-label="Hashi">
     <line class="ib" x1="70" y1="60" x2="230" y2="60" pathLength="1" style="animation-delay:.55s"/>
@@ -134,6 +138,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   </svg>
 </div>
 <section id="home">
+  <button class="hdrbtn theme" data-theme-btn aria-label="Changer de mode">明</button>
   <div class="homein">
     <div class="hk">橋</div>
     <h1 class="ht">HASHI</h1>
@@ -154,7 +159,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   <header>
     <button class="back" id="backBtn" aria-label="Choix du niveau">‹</button>
     <div class="title"><span class="kanji">橋</span><h1>HASHI</h1></div>
-    <button class="hdrbtn" id="rulesBtn" aria-label="Règles">?</button>
+    <div style="display:flex"><button class="hdrbtn theme" data-theme-btn aria-label="Changer de mode">明</button><button class="hdrbtn" id="rulesBtn" aria-label="Règles">?</button></div>
   </header>
   <div class="actions">
     <button class="act" id="undoBtn"><em>戻</em>Annuler</button>
@@ -197,6 +202,7 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
     <li><b>Zoom</b> : pince à deux doigts (ou molette de la souris). Une fois zoomé, glisse depuis un espace vide pour te déplacer.</li>
     <li>L'indice se précise à chaque appui : une zone, puis une île, puis le pont et le raisonnement.</li>
     <li>Le bouton ‹ en haut à gauche ramène au choix du niveau. Ta partie est gardée.</li>
+    <li>Le bouton 明 / 暗 passe en mode clair ou sombre.</li>
   </ul>
   <p style="text-align:center;margin-top:18px"><button class="small" id="rulesClose">Fermer</button></p>
 </div></div>

@@ -282,14 +282,42 @@ function findHint() {
   const lo = Int8Array.from(st.x), hi = initHi(P);
   for (let k = 0; k < hi.length; k++) if (hi[k] < lo[k]) hi[k] = lo[k];
   let found = null;
-  propagate(P, lo, hi, (k, nl, i) => {
+  const stopAt = (k, nl, i) => {
     const L = P.inc[i], n = P.islands[i].n;
     const possible = L.filter(q => hi[q] > 0).length;
     let othersMax = 0;
     for (const q of L) if (q !== k) othersMax += hi[q];
     found = { k, island: i, target: nl, n, possible, othersMax, hiK: hi[k], total: L.length };
     return true;
-  });
+  };
+  propagate(P, lo, hi, stopAt);
+  // Proof by contradiction: try a value on an open link and see if the grid breaks.
+  let usedLook = false;
+  for (let round = 0; round < 400 && !found; round++) {
+    let progress = false;
+    for (let k = 0; k < lo.length && !progress && !found; k++) {
+      if (lo[k] >= hi[k]) continue;
+      for (const v of [lo[k], hi[k]]) {
+        const l2 = lo.slice(), h2 = hi.slice();
+        l2[k] = v; h2[k] = v;
+        const r = propagate(P, l2, h2);
+        const bad = r === false ? 'island' : (!connected(P, h2) ? 'split' : null);
+        if (!bad) continue;
+        if (v === lo[k]) {
+          const e = P.edges[k];
+          const what = v === 0 ? 'Si on ne posait aucun pont entre ces deux îles' : 'Avec un seul pont entre ces deux îles';
+          const why = bad === 'split' ? 'un groupe d\'îles se retrouverait coupé du reste de l\'archipel' : 'une île plus loin ne pourrait plus atteindre son nombre de ponts';
+          const tgt = lo[k] + 1;
+          return { type: 'look', k, island: e.a, target: tgt,
+            text: `Raisonnement par l'absurde : ${what.charAt(0).toLowerCase() + what.slice(1)}, ${why}. Il faut donc au moins ${tgt} pont${tgt > 1 ? 's' : ''} ici.` };
+        }
+        hi[k]--; usedLook = true; progress = true;
+        if (propagate(P, lo, hi, stopAt) === false) progress = false;
+        break;
+      }
+    }
+    if (!progress) break;
+  }
   if (found) {
     const f = found;
     let text;
@@ -299,7 +327,8 @@ function findHint() {
       text = `Cette île de ${f.n} a besoin de tous les ponts encore possibles : ses ${f.possible} voisines doivent chacune lui envoyer le maximum.`;
     else
       text = `Les autres voisines de cette île de ${f.n} ne peuvent lui apporter que ${f.othersMax} pont${f.othersMax > 1 ? 's' : ''} au plus : il en faut donc au moins ${f.target} vers celle-ci.`;
-    if (f.total > f.possible) text += ' Attention : certaines voisines sont bloquées (pont qui croise, île déjà pleine ou paire qui s\'isolerait).';
+    if (usedLook) text += ' (Certaines liaisons ont déjà été exclues : y mettre un pont mènerait à une impasse.)';
+    else if (f.total > f.possible) text += ' Attention : certaines voisines sont bloquées (pont qui croise, île déjà pleine ou paire qui s\'isolerait).';
     return { type: 'logic', k: f.k, island: f.island, target: f.target, text };
   }
   for (let k = 0; k < P.edges.length; k++) if (st.x[k] < st.sol[k]) {
@@ -405,7 +434,25 @@ function tick() {
   if (st.elapsed % 5000 === 0) save();
 }
 
+
+function applyTheme(light) {
+  document.body.classList.toggle('light', light);
+  document.querySelectorAll('[data-theme-btn]').forEach(b => {
+    b.textContent = light ? '暗' : '明';
+    b.setAttribute('aria-label', light ? 'Mode sombre' : 'Mode clair');
+  });
+  try {
+    const SB = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SystemBars;
+    if (SB && SB.setStyle) SB.setStyle({ style: light ? 'LIGHT' : 'DARK' });
+  } catch (e) {}
+}
 function init() {
+  applyTheme(store.get('hashi-theme') === 'light');
+  document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => {
+    const light = !document.body.classList.contains('light');
+    store.set('hashi-theme', light ? 'light' : 'dark');
+    applyTheme(light);
+  }));
   document.querySelectorAll('.hl').forEach(b => b.addEventListener('click', () => { showGame(); newGame(b.dataset.l); }));
   $('resumeBtn').addEventListener('click', showGame);
   $('backBtn').addEventListener('click', showHome);
