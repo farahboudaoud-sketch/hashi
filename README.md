@@ -13,12 +13,12 @@ Les mises à jour s'installent par-dessus l'ancienne version sans perdre la part
 
 ## Le jeu
 
-- **5 niveaux** : Facile 7×7, Moyen 10×10, Difficile 13×13, Expert 13×18, Maître 18×22. Chaque grille est générée au hasard et un solveur vérifie qu'elle n'a qu'une seule solution. En **Maître**, seules les grilles qui demandent plusieurs raisonnements par l'absurde (au moins 8) sont gardées.
+- **5 niveaux** : Facile 7×7, Moyen 10×10, Difficile 13×13, Expert 13×18, Maître 18×22. Chaque grille est générée au hasard et un solveur vérifie qu'elle n'a qu'une seule solution. En **Maître**, seules les grilles qui demandent de nombreux raisonnements par l'absurde (au moins 20 pour le solveur) sont gardées.
 - **Niveau personnalisé** : sur l'accueil, choisir la largeur (5 à 25), la hauteur (5 à 30) et le style (classique, ou difficile comme Maître). Record séparé pour chaque taille.
 - **Page d'accueil** : choix du niveau (avec les records) et reprise de la partie en cours. Le bouton ‹ ramène à l'accueil.
 - **Poser un pont** : glisser le doigt d'une île vers une île voisine ; un deuxième glissement pose un deuxième pont (2 au maximum).
 - **Retirer un pont** : le toucher ; chaque toucher en retire un.
-- **Indices progressifs** : le bouton 灯 clignote après 2 minutes sans progrès. Chaque appui précise l'indice (zone, puis île, puis pont avec le raisonnement, y compris les raisonnements par l'absurde), et « Poser » applique le pont.
+- **Indices progressifs** : le bouton 灯 clignote après 2 minutes sans progrès. Chaque appui précise l'indice (zone, puis île, puis pont avec le raisonnement). Un indice ne s'appuie que sur ce qui est visible sur la grille ; une liaison impossible est notée sur la grille (× ou « 1 max »), et un raisonnement par l'absurde montre l'île où il aboutit, et « Poser » applique le pont.
 - Barre d'actions en haut : **Annuler**, **Vérifier** (ponts faux en rouge), **Indice**, **Effacer**, **Nouvelle** grille.
 - **Chronomètre** et **record par niveau** (seulement pour les parties sans indice). La partie en cours est sauvegardée automatiquement.
 - **Mode clair / sombre** : bouton 明 / 暗 (couleurs inversées : fond blanc cassé, encre bleu nuit). Le choix est mémorisé.

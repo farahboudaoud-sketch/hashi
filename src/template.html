@@ -48,6 +48,10 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 .isl.over circle{stroke:var(--red2);fill:var(--overfill)}
 .isl.over text{fill:var(--red2)}
 .isl.sel circle{stroke:var(--red2);stroke-width:4}
+.hmark{stroke:var(--red2);stroke-width:3;stroke-linecap:round}
+.hmark1{fill:var(--red2);font-family:'Chiffres','Shippori Mincho',serif;font-size:15px;font-weight:700;text-anchor:middle}
+.ghostm{animation:breathe 1.3s ease-in-out infinite}
+.isl.failed circle{stroke:var(--red2);stroke-width:4;stroke-dasharray:5 4}
 .isl.hinted circle{stroke:var(--red2);stroke-width:4;animation:breathe 1.2s ease-in-out infinite}
 #hintBox{display:none;margin-top:6px;min-height:0;border-left:3px solid var(--red);background:var(--tint);padding:7px 10px;border-radius:0 6px 6px 0;font-size:13.5px;line-height:1.45;align-items:center;gap:10px;justify-content:space-between;flex-shrink:0}
 #hintBox.on{display:flex}
@@ -103,6 +107,12 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
 #winRecord{color:var(--red2)!important}
 #loading{position:absolute;inset:0;display:none;place-items:center;color:var(--ink2);font-size:14px;letter-spacing:.1em;background:var(--navy2);z-index:3}
 #loading.on{display:grid}
+#confirm{position:fixed;inset:0;z-index:15;background:var(--veil);display:none;place-items:center;padding:20px}
+#confirm.on{display:grid}
+.cfcard{max-width:340px;width:100%;background:var(--navy2);border:1px solid var(--ink3);border-radius:12px;padding:18px 18px 14px;text-align:center}
+.cfcard p{margin:0 0 16px;font-size:15px;line-height:1.55;color:var(--ink)}
+.cfbtns{display:flex;gap:10px;justify-content:center}
+.cfbtns .small{padding:9px 16px;font-size:14px}
 #rules{position:fixed;inset:0;z-index:10;background:var(--navy2);display:none;overflow:auto;padding:calc(20px + env(safe-area-inset-top)) 20px 20px}
 #rules.on{display:block}
 .rulescard{max-width:560px;margin:0 auto;font-size:14.5px;line-height:1.65;color:var(--ink2)}
@@ -228,6 +238,10 @@ h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.18em;line-height:1.1}
   </div>
   <div id="hintBox"><span id="hintText"></span><button class="small" id="applyBtn">Poser</button></div>
 </div>
+<div id="confirm"><div class="cfcard">
+  <p id="cfText"></p>
+  <div class="cfbtns"><button class="small ghostb" id="cfNo">Annuler</button><button class="small" id="cfYes">OK</button></div>
+</div></div>
 <div id="rules"><div class="rulescard">
   <h3 style="margin-top:0">Règles du Hashi</h3>
   <ul>

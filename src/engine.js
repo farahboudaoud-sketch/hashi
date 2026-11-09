@@ -3,7 +3,7 @@ const LEVELS = {
   moyen:     { W: 10, H: 10, min: 18, max: 23, label: 'Moyen',     kanji: '中' },
   difficile: { W: 13, H: 13, min: 30, max: 36, label: 'Difficile', kanji: '難' },
   expert:    { W: 13, H: 18, min: 42, max: 50, label: 'Expert',    kanji: '極' },
-  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 8, open: 50 } },
+  maitre:    { W: 18, H: 22, min: 75, max: 88, label: 'Maître',    kanji: '鬼', p2: 0.25, loop: 0.45, hard: { look: 20, open: 50 } },
   perso:     { W: 12, H: 12, min: 24, max: 30, label: 'Personnalisé', kanji: '自' }
 };
 // Builds the settings of the custom level from a width, a height and a style.
@@ -69,24 +69,25 @@ function initHi(P) {
 }
 
 // Returns false on contradiction, 'stop' if stopAt asked to stop, true otherwise.
+// On contradiction, propagate.fail tells where it happened.
 function propagate(P, lo, hi, stopAt) {
   const { edges, inc, cross, islands } = P;
   let changed = true;
   while (changed) {
     changed = false;
     for (let k = 0; k < edges.length; k++) if (lo[k] > 0) for (const x of cross[k]) {
-      if (lo[x] > 0) return false;
+      if (lo[x] > 0) { propagate.fail = { type: 'cross', k: x, i: edges[x].a }; return false; }
       if (hi[x] > 0) { hi[x] = 0; changed = true; }
     }
     for (let i = 0; i < islands.length; i++) {
       const need = islands[i].n, L = inc[i];
       let sL = 0, sH = 0;
       for (const k of L) { sL += lo[k]; sH += hi[k]; }
-      if (sL > need || sH < need) return false;
+      if (sL > need || sH < need) { propagate.fail = { type: 'island', i }; return false; }
       for (const k of L) {
         const nl = Math.max(lo[k], need - (sH - hi[k]));
         const nh = Math.min(hi[k], need - (sL - lo[k]));
-        if (nl > nh) return false;
+        if (nl > nh) { propagate.fail = { type: 'island', i }; return false; }
         if (nh < hi[k]) { sH -= hi[k] - nh; hi[k] = nh; changed = true; }
         if (nl > lo[k]) {
           if (stopAt && stopAt(k, nl, i)) { lo[k] = nl; return 'stop'; }
@@ -216,7 +217,7 @@ function generateOnce(L) {
 }
 
 function generate(levelKey) {
-  const L = LEVELS[levelKey];
+  const L = typeof levelKey === 'string' ? LEVELS[levelKey] : levelKey;
   let fallback = null, best = null, bestScore = -1;
   const t0 = Date.now();
   for (let attempt = 0; attempt < 6000; attempt++) {
